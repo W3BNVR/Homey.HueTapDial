@@ -1,0 +1,18 @@
+{
+  "settings": {
+    "title": "Hue Bridge-verbinding",
+    "subtitle": "Vul de Bridgegegevens in om de Tap Dial te gebruiken.",
+    "bridge_ip": "IP-adres Hue Bridge",
+    "connect": "Hue Bridge verbinden",
+    "press_link_button": "Druk nu op de ronde linkknop op de Hue Bridge. Klik daarna op ‘Ik heb gedrukt’.",
+    "confirm_link": "Ik heb gedrukt",
+    "enter_ip": "Vul eerst het IP-adres van de Hue Bridge in.",
+    "connecting": "Verbinden met de Hue Bridge…",
+    "connected": "Verbonden. De application key is opgeslagen.",
+    "invalid_ip": "Vul een privé-IP-adres van je Hue Bridge in.",
+    "link_not_pressed": "De Bridge heeft de linkknop niet gedetecteerd. Druk op de knop en probeer het opnieuw.",
+    "bridge_timeout": "De Hue Bridge reageerde niet op tijd. Controleer het IP-adres en probeer het opnieuw.",
+    "bridge_unreachable": "De Hue Bridge is niet bereikbaar. Controleer of Homey en de Bridge op hetzelfde netwerk zitten.",
+    "bridge_rejected": "De Hue Bridge kon geen application key maken. Probeer het opnieuw."
+  }
+}

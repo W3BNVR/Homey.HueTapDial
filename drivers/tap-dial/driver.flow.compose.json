@@ -1,0 +1,17 @@
+{
+  "triggers": [
+    { "id": "short_press", "title": { "en": "Short press", "nl": "Kort indrukken" }, "args": [{ "name": "button", "type": "dropdown", "title": { "en": "Button", "nl": "Knop" }, "values": [{ "id": "1", "title": "1" }, { "id": "2", "title": "2" }, { "id": "3", "title": "3" }, { "id": "4", "title": "4" }] }] },
+    { "id": "long_press", "title": { "en": "Long press", "nl": "Lang indrukken" }, "args": [{ "name": "button", "type": "dropdown", "title": { "en": "Button", "nl": "Knop" }, "values": [{ "id": "1", "title": "1" }, { "id": "2", "title": "2" }, { "id": "3", "title": "3" }, { "id": "4", "title": "4" }] }] },
+    { "id": "double_click", "title": { "en": "Double click", "nl": "Dubbelklik" }, "args": [{ "name": "button", "type": "dropdown", "title": { "en": "Button", "nl": "Knop" }, "values": [{ "id": "1", "title": "1" }, { "id": "2", "title": "2" }, { "id": "3", "title": "3" }, { "id": "4", "title": "4" }] }] },
+    {
+      "id": "dial_rotated",
+      "title": { "en": "Dial rotated", "nl": "Draaiknop gedraaid" },
+      "tokens": [
+        { "name": "direction", "type": "text", "title": { "en": "Direction", "nl": "Richting" } },
+        { "name": "steps", "type": "number", "title": { "en": "Steps", "nl": "Stapjes" } },
+        { "name": "duration", "type": "number", "title": { "en": "Duration (ms)", "nl": "Duur (ms)" } },
+        { "name": "phase", "type": "text", "title": { "en": "Rotation phase", "nl": "Draaistatus" } }
+      ]
+    }
+  ]
+}
