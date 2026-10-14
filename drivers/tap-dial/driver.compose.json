@@ -4,7 +4,7 @@
   "capabilities": [],
   "platforms": ["local"],
   "pair": [
-    { "id": "list_devices", "template": "list_devices", "navigation": { "next": "add_devices" }, "options": { "singular": true } },
+    { "id": "list_devices", "template": "list_devices", "navigation": { "next": "add_devices" } },
     { "id": "add_devices", "template": "add_devices" }
   ]
 }
