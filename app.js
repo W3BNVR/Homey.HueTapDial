@@ -37,19 +37,53 @@ class HueBridge extends EventEmitter {
   }
 
   async discoverTapDials() {
-    const result = await this.request('/clip/v2/resource/device');
-    return (result.data || []).filter(device => {
+    const [deviceResult, buttonResult, rotaryResult] = await Promise.all([
+      this.request('/clip/v2/resource/device'),
+      this.request('/clip/v2/resource/button').catch(() => ({ data: [] })),
+      this.request('/clip/v2/resource/relative_rotary').catch(() => ({ data: [] })),
+    ]);
+
+    const buttonsByOwner = new Map();
+    for (const button of buttonResult.data || []) {
+      const ownerId = button.owner && button.owner.rid;
+      if (!ownerId) continue;
+      if (!buttonsByOwner.has(ownerId)) buttonsByOwner.set(ownerId, []);
+      buttonsByOwner.get(ownerId).push(button.id);
+    }
+    const rotariesByOwner = new Map();
+    for (const rotary of rotaryResult.data || []) {
+      const ownerId = rotary.owner && rotary.owner.rid;
+      if (!ownerId) continue;
+      if (!rotariesByOwner.has(ownerId)) rotariesByOwner.set(ownerId, []);
+      rotariesByOwner.get(ownerId).push(rotary.id);
+    }
+
+    const found = [];
+    for (const device of (deviceResult.data || [])) {
       const model = device.product_data && device.product_data.model_id;
-      const name = device.metadata && device.metadata.name;
-      return model === 'RDM002' || /tap\s*dial/i.test(name || '');
-    }).map(device => ({
-      name: (device.metadata && device.metadata.name) || 'Hue Tap Dial Switch',
-      data: { id: device.id },
-      store: {
-        buttonIds: (device.services || []).filter(service => service.rtype === 'button').map(service => service.rid),
-        rotaryIds: (device.services || []).filter(service => service.rtype === 'relative_rotary').map(service => service.rid),
-      },
-    })).filter(device => device.store.buttonIds.length > 0 || device.store.rotaryIds.length > 0);
+      const productName = device.product_data && device.product_data.product_name;
+      const deviceName = device.metadata && device.metadata.name;
+      const services = device.services || [];
+      const buttonIds = [...new Set([
+        ...services.filter(service => service.rtype === 'button').map(service => service.rid),
+        ...(buttonsByOwner.get(device.id) || []),
+      ])];
+      const rotaryIds = [...new Set([
+        ...services.filter(service => service.rtype === 'relative_rotary').map(service => service.rid),
+        ...(rotariesByOwner.get(device.id) || []),
+      ])];
+      const isTapDial = model === 'RDM002'
+        || /tap\s*dial/i.test(`${deviceName || ''} ${productName || ''}`)
+        || (buttonIds.length >= 4 && rotaryIds.length > 0);
+      if (!isTapDial || (buttonIds.length === 0 && rotaryIds.length === 0)) continue;
+      found.push({
+        name: deviceName || productName || 'Hue Tap Dial Switch',
+        data: { id: device.id },
+        store: { buttonIds, rotaryIds },
+      });
+    }
+    this.log(`Hue discovery: ${found.length} Tap Dial device(s), ${buttonsByOwner.size} button owner(s), ${rotariesByOwner.size} rotary owner(s).`);
+    return found;
   }
 
   connect() {
