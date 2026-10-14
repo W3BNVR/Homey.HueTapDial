@@ -1,6 +1,6 @@
 # Hue Tap Dial Events for Homey
 
-Deze Homey-app voegt de Philips Hue Tap Dial Switch toe als apart apparaat en biedt drie apparaatstriggers:
+Deze Homey-app voegt de Philips Hue Tap Dial Switch toe als apart apparaat en biedt vier apparaatstriggers:
 
 - **Kort indrukken**
 - **Lang indrukken**
