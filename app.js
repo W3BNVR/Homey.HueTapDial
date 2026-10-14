@@ -350,7 +350,7 @@ class HueTapDialApp extends Homey.App {
           this.pendingShortPresses.delete(pressKey);
           const matchedDevices = driver.onHueButtonEvent(resource.id, buttonNumber, 'short_press');
           this.recordHueButtonEvent(buttonNumber, event, 'short_press', matchedDevices, null);
-        }, 450);
+        }, 900);
         this.pendingShortPresses.set(pressKey, { timer, resourceId: resource.id, buttonNumber, event });
         this.lastHueEvent = {
           kind: 'button', controlId: buttonNumber, event, action: 'waiting_for_second_tap',
