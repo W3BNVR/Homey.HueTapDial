@@ -44,10 +44,20 @@ class HueBridge extends EventEmitter {
   }
 
   async discoverTapDials() {
+    let buttonError = null;
+    let rotaryError = null;
     const [deviceResult, buttonResult, rotaryResult] = await Promise.all([
       this.request('/clip/v2/resource/device'),
-      this.request('/clip/v2/resource/button').catch(() => ({ data: [] })),
-      this.request('/clip/v2/resource/relative_rotary').catch(() => ({ data: [] })),
+      this.request('/clip/v2/resource/button').catch(error => {
+        buttonError = error.message;
+        this.log(`Hue button discovery request failed: ${error.message}`);
+        return { data: [] };
+      }),
+      this.request('/clip/v2/resource/relative_rotary').catch(error => {
+        rotaryError = error.message;
+        this.log(`Hue rotary discovery request failed: ${error.message}`);
+        return { data: [] };
+      }),
     ]);
 
     const buttonsByOwner = new Map();
@@ -103,6 +113,18 @@ class HueBridge extends EventEmitter {
       const paired = found.some(item => item.data.id === device.id);
       return `${name} (${model}, ${paired ? 'paired' : 'missing services'})`;
     }).join('; ') || 'none';
+    this.lastDiscovery = {
+      deviceCount: (deviceResult.data || []).length,
+      buttonCount: (buttonResult.data || []).length,
+      rotaryCount: (rotaryResult.data || []).length,
+      candidates: candidates.map(device => ({
+        name: device.metadata && device.metadata.name || 'unnamed',
+        model: device.product_data && device.product_data.model_id || 'unknown',
+        buttonCount: found.find(item => item.data.id === device.id)?.store.buttonIds.length || 0,
+        rotaryCount: found.find(item => item.data.id === device.id)?.store.rotaryIds.length || 0,
+      })),
+      errors: [buttonError, rotaryError].filter(Boolean),
+    };
     this.log(`Hue discovery: ${found.length} Tap Dial device(s) from ${deviceResult.data?.length || 0} devices; ${buttonResult.data?.length || 0} buttons, ${rotaryResult.data?.length || 0} rotaries. Candidates: ${candidateSummary}.`);
     return found;
   }
@@ -185,6 +207,17 @@ class HueTapDialApp extends Homey.App {
   getBridgeConnectionStatus() {
     if (!this.bridge) return { status: 'not_configured', configured: false };
     return { status: this.bridge.connectionStatus, configured: true };
+  }
+
+  async diagnoseTapDialDiscovery() {
+    if (!this.bridge) return { ok: false, status: 'not_configured' };
+    try {
+      const devices = await this.bridge.discoverTapDials();
+      return { ok: true, status: this.bridge.connectionStatus, discovery: this.bridge.lastDiscovery, foundCount: devices.length };
+    } catch (error) {
+      this.log(`Hue Tap Dial diagnostic failed: ${error.message}`);
+      return { ok: false, status: this.bridge.connectionStatus, error: error.message };
+    }
   }
 
   async createHueApplicationKey(ip) {

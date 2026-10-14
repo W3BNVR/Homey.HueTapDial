@@ -12,6 +12,7 @@
   "drivers": [{ "id": "tap-dial", "name": { "en": "Hue Tap Dial Switch", "nl": "Hue Tap Dial Switch" }, "class": "remote", "capabilities": [], "platforms": ["local"] }],
   "api": {
     "createHueApplicationKey": { "method": "POST", "path": "/create-key" },
-    "getHueBridgeConnectionStatus": { "method": "GET", "path": "/connection-status" }
+    "getHueBridgeConnectionStatus": { "method": "GET", "path": "/connection-status" },
+    "diagnoseHueTapDialDiscovery": { "method": "POST", "path": "/diagnose-discovery" }
   }
 }

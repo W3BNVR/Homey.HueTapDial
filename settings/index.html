@@ -43,6 +43,8 @@
     .connection-status.disconnected, .connection-status.unauthorized { background-color: #301f25 !important; border-color: #84404d; }
     .connection-status.disconnected::before, .connection-status.unauthorized::before { background: #ff7183; box-shadow: 0 0 0 4px rgba(255, 113, 131, .16); }
     .connection-status.not_configured, .connection-status.status_unavailable { background-color: #202938 !important; }
+    #diagnose { margin-top: 10px; }
+    #diagnosis-result { padding: 12px; margin-top: 10px; white-space: pre-wrap; overflow-wrap: anywhere; border-radius: 8px; background: #202938; color: #e4ebf4; line-height: 1.45; }
   </style>
 </head>
 <body>
@@ -59,6 +61,8 @@
     <input class="homey-form-input" id="bridge_ip" type="text" placeholder="192.168.1.10" />
   </div>
   <button id="connect" class="homey-button-primary-full" data-i18n="settings.connect">Verbinden</button>
+  <button id="diagnose" class="homey-button-secondary-full" data-i18n="settings.diagnose">Detectie controleren</button>
+  <pre id="diagnosis-result" hidden role="status"></pre>
   <div id="link-step" hidden>
     <p id="link-instructions" data-i18n="settings.press_link_button">Druk nu op de ronde linkknop op de Hue Bridge. De app controleert automatisch of de Bridge de druk heeft gezien.</p>
     <button id="cancel-link" class="homey-button-secondary-full" data-i18n="settings.cancel">Annuleren</button>
@@ -74,6 +78,8 @@
       const connectionStatus = document.getElementById('connection-status');
       const connectionLabel = document.getElementById('connection-label');
       const connectionDetail = document.getElementById('connection-detail');
+      const diagnose = document.getElementById('diagnose');
+      const diagnosisResult = document.getElementById('diagnosis-result');
       let cancelled = false;
       let connecting = false;
       const refreshConnectionStatus = () => {
@@ -133,6 +139,36 @@
         connect.disabled = false;
         linkStep.hidden = true;
         status.textContent = Homey.__('settings.cancelled');
+      });
+      diagnose.addEventListener('click', () => {
+        diagnose.disabled = true;
+        diagnosisResult.hidden = false;
+        diagnosisResult.textContent = Homey.__('settings.diagnosing');
+        Homey.api('POST', '/diagnose-discovery', {}, (error, result) => {
+          diagnose.disabled = false;
+          if (error || !result) {
+            diagnosisResult.textContent = Homey.__('settings.diagnosis_failed');
+            return;
+          }
+          if (!result.ok) {
+            diagnosisResult.textContent = Homey.__(result.status === 'not_configured' ? 'settings.connection_detail_not_configured' : 'settings.diagnosis_failed');
+            return;
+          }
+          const discovery = result.discovery || {};
+          const lines = [
+            `${Homey.__('settings.diagnosis_found')}: ${result.foundCount || 0}`,
+            `${Homey.__('settings.diagnosis_resources')}: ${discovery.deviceCount || 0} / ${discovery.buttonCount || 0} / ${discovery.rotaryCount || 0}`,
+          ];
+          if (discovery.candidates && discovery.candidates.length) {
+            lines.push(`${Homey.__('settings.diagnosis_candidates')}:`);
+            discovery.candidates.forEach(candidate => lines.push(`• ${candidate.name} (${candidate.model}) — ${candidate.buttonCount} ${Homey.__('settings.diagnosis_buttons')}, ${candidate.rotaryCount} ${Homey.__('settings.diagnosis_rotaries')}`));
+          } else {
+            lines.push(Homey.__('settings.diagnosis_none'));
+          }
+          if (discovery.errors && discovery.errors.length) lines.push(`${Homey.__('settings.diagnosis_errors')}: ${discovery.errors.join('; ')}`);
+          if (result.error) lines.push(`${Homey.__('settings.diagnosis_errors')}: ${result.error}`);
+          diagnosisResult.textContent = lines.join('\n');
+        });
       });
       Homey.ready();
       refreshConnectionStatus();

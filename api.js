@@ -7,4 +7,7 @@ module.exports = {
   async getHueBridgeConnectionStatus({ homey }) {
     return homey.app.getBridgeConnectionStatus();
   },
+  async diagnoseHueTapDialDiscovery({ homey }) {
+    return homey.app.diagnoseTapDialDiscovery();
+  },
 };
