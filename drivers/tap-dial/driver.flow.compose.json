@@ -7,10 +7,10 @@
       "id": "dial_rotated",
       "title": { "en": "Dial rotated", "nl": "Draaiknop gedraaid" },
       "tokens": [
-        { "name": "direction", "type": "text", "title": { "en": "Direction", "nl": "Richting" } },
+        { "name": "direction", "type": "string", "title": { "en": "Direction", "nl": "Richting" } },
         { "name": "steps", "type": "number", "title": { "en": "Steps", "nl": "Stapjes" } },
         { "name": "duration", "type": "number", "title": { "en": "Duration (ms)", "nl": "Duur (ms)" } },
-        { "name": "phase", "type": "text", "title": { "en": "Rotation phase", "nl": "Draaistatus" } }
+        { "name": "phase", "type": "string", "title": { "en": "Rotation phase", "nl": "Draaistatus" } }
       ]
     }
   ]
