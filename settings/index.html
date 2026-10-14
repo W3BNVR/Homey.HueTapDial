@@ -10,13 +10,39 @@
     .hint { color: #666; line-height: 1.45; }
     #status { margin-top: 12px; }
     #link-instructions { line-height: 1.45; }
-    .connection-status { margin: 18px 0; padding: 12px; border-radius: 8px; background: #252525; }
-    .connection-status strong { display: block; }
-    .connection-status small { display: block; margin-top: 4px; line-height: 1.4; color: #aaa; }
-    .connection-status::before { content: ''; display: inline-block; width: 10px; height: 10px; margin-right: 8px; border-radius: 50%; background: #888; }
-    .connection-status.connected::before { background: #28c840; }
-    .connection-status.connecting::before, .connection-status.reconnecting::before { background: #ffb020; }
-    .connection-status.disconnected::before, .connection-status.unauthorized::before { background: #ff453a; }
+    .connection-status {
+      display: grid;
+      grid-template-columns: 10px minmax(0, 1fr);
+      column-gap: 11px;
+      row-gap: 3px;
+      margin: 18px 0;
+      padding: 15px 16px;
+      border: 1px solid #34445a;
+      border-radius: 12px;
+      background-color: #172233 !important;
+      color: #f2f6fc !important;
+      box-shadow: 0 5px 18px rgba(0, 0, 0, .18);
+    }
+    .connection-status strong { display: block; color: #fff !important; font-weight: 600; }
+    .connection-status small { display: block; margin-top: 4px; line-height: 1.45; color: #c3cfdd !important; }
+    .connection-status::before {
+      content: '';
+      grid-column: 1;
+      grid-row: 1 / span 2;
+      width: 10px;
+      height: 10px;
+      margin-top: 5px;
+      border-radius: 50%;
+      background: #8b98aa;
+      box-shadow: 0 0 0 4px rgba(139, 152, 170, .14);
+    }
+    .connection-status.connected { background-color: #142c25 !important; border-color: #28664f; }
+    .connection-status.connected::before { background: #36d991; box-shadow: 0 0 0 4px rgba(54, 217, 145, .16); }
+    .connection-status.connecting, .connection-status.reconnecting { background-color: #2a271b !important; border-color: #78632b; }
+    .connection-status.connecting::before, .connection-status.reconnecting::before { background: #ffd166; box-shadow: 0 0 0 4px rgba(255, 209, 102, .16); }
+    .connection-status.disconnected, .connection-status.unauthorized { background-color: #301f25 !important; border-color: #84404d; }
+    .connection-status.disconnected::before, .connection-status.unauthorized::before { background: #ff7183; box-shadow: 0 0 0 4px rgba(255, 113, 131, .16); }
+    .connection-status.not_configured, .connection-status.status_unavailable { background-color: #202938 !important; }
   </style>
 </head>
 <body>
