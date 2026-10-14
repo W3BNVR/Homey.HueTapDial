@@ -13,6 +13,13 @@ class HueBridge extends EventEmitter {
     this.log = logger;
     this.closed = false;
     this.retry = 1000;
+    this.connectionStatus = 'connecting';
+  }
+
+  setConnectionStatus(status) {
+    if (this.connectionStatus === status) return;
+    this.connectionStatus = status;
+    this.emit('connection-status', status);
   }
 
   request(path) {
@@ -102,6 +109,7 @@ class HueBridge extends EventEmitter {
 
   connect() {
     if (this.closed) return;
+    this.setConnectionStatus('connecting');
     const req = https.get({
       hostname: this.ip, port: 443, path: '/eventstream/clip/v2',
       headers: { 'hue-application-key': this.key, accept: 'text/event-stream' },
@@ -109,9 +117,11 @@ class HueBridge extends EventEmitter {
     }, res => {
       if (res.statusCode !== 200) {
         this.log(`Hue event stream returned HTTP ${res.statusCode}`);
+        this.setConnectionStatus(res.statusCode === 401 || res.statusCode === 403 ? 'unauthorized' : 'disconnected');
         res.resume();
         return this.scheduleReconnect();
       }
+      this.setConnectionStatus('connected');
       this.retry = 1000;
       let buffer = '';
       res.setEncoding('utf8');
@@ -138,6 +148,7 @@ class HueBridge extends EventEmitter {
 
   scheduleReconnect() {
     if (this.closed || this.reconnectTimer) return;
+    this.setConnectionStatus('reconnecting');
     const delay = this.retry;
     this.retry = Math.min(this.retry * 2, 60000);
     this.reconnectTimer = setTimeout(() => { this.reconnectTimer = null; this.connect(); }, delay);
@@ -169,6 +180,11 @@ class HueTapDialApp extends Homey.App {
     this.bridge = new HueBridge(ip, key, message => this.log(message));
     this.bridge.on('resource', resource => this.handleHueResource(resource));
     this.bridge.connect();
+  }
+
+  getBridgeConnectionStatus() {
+    if (!this.bridge) return { status: 'not_configured', configured: false };
+    return { status: this.bridge.connectionStatus, configured: true };
   }
 
   async createHueApplicationKey(ip) {

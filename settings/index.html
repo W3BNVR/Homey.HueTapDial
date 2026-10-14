@@ -10,6 +10,13 @@
     .hint { color: #666; line-height: 1.45; }
     #status { margin-top: 12px; }
     #link-instructions { line-height: 1.45; }
+    .connection-status { margin: 18px 0; padding: 12px; border-radius: 8px; background: #252525; }
+    .connection-status strong { display: block; }
+    .connection-status small { display: block; margin-top: 4px; line-height: 1.4; color: #aaa; }
+    .connection-status::before { content: ''; display: inline-block; width: 10px; height: 10px; margin-right: 8px; border-radius: 50%; background: #888; }
+    .connection-status.connected::before { background: #28c840; }
+    .connection-status.connecting::before, .connection-status.reconnecting::before { background: #ffb020; }
+    .connection-status.disconnected::before, .connection-status.unauthorized::before { background: #ff453a; }
   </style>
 </head>
 <body>
@@ -17,6 +24,10 @@
     <h1 class="homey-title" data-i18n="settings.title">Hue Bridge-verbinding</h1>
     <p class="homey-subtitle" data-i18n="settings.subtitle">Vul de Bridgegegevens in om de Tap Dial te gebruiken.</p>
   </header>
+  <section id="connection-status" class="connection-status" aria-live="polite">
+    <strong id="connection-label">Status controleren…</strong>
+    <small id="connection-detail"></small>
+  </section>
   <div class="homey-form-group">
     <label class="homey-form-label" for="bridge_ip" data-i18n="settings.bridge_ip">IP-adres Hue Bridge</label>
     <input class="homey-form-input" id="bridge_ip" type="text" placeholder="192.168.1.10" />
@@ -34,8 +45,19 @@
       const connect = document.getElementById('connect');
       const linkStep = document.getElementById('link-step');
       const cancelLink = document.getElementById('cancel-link');
+      const connectionStatus = document.getElementById('connection-status');
+      const connectionLabel = document.getElementById('connection-label');
+      const connectionDetail = document.getElementById('connection-detail');
       let cancelled = false;
       let connecting = false;
+      const refreshConnectionStatus = () => {
+        Homey.api('GET', '/connection-status', {}, (error, result) => {
+          const state = !error && result && result.status ? result.status : 'status_unavailable';
+          connectionStatus.className = `connection-status ${state}`;
+          connectionLabel.textContent = Homey.__(`settings.connection_${state}`);
+          connectionDetail.textContent = Homey.__(`settings.connection_detail_${state}`);
+        });
+      };
       Homey.get('bridge_ip', (err, value) => { if (!err && value) ip.value = value; });
       connect.addEventListener('click', () => {
         const address = ip.value.trim();
@@ -87,6 +109,8 @@
         status.textContent = Homey.__('settings.cancelled');
       });
       Homey.ready();
+      refreshConnectionStatus();
+      window.setInterval(refreshConnectionStatus, 4000);
     }
   </script>
 </body>
