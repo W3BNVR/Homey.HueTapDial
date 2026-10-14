@@ -4,7 +4,7 @@
   "compatibility": ">=12.0.0",
   "sdk": 3,
   "name": { "en": "Hue Tap Dial Events", "nl": "Hue Tap Dial Events" },
-  "description": { "en": "Distinct Homey Flow triggers for Hue Tap Dial short press, long press and double click.", "nl": "Afzonderlijke Homey Flow-triggers voor kort indrukken, lang indrukken en dubbelklikken op de Hue Tap Dial." },
+  "description": { "en": "Homey Flow triggers for Hue Tap Dial buttons and rotary dial.", "nl": "Homey Flow-triggers voor de knoppen en draaiknop van de Hue Tap Dial." },
   "category": ["tools"],
   "platforms": ["local"],
   "brandColor": "#00A4E4",

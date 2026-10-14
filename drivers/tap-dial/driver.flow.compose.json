@@ -1,8 +1,51 @@
 {
   "triggers": [
-    { "id": "short_press", "title": { "en": "Short press", "nl": "Kort indrukken" }, "args": [{ "name": "button", "type": "dropdown", "title": { "en": "Button", "nl": "Knop" }, "values": [{ "id": "1", "title": "1" }, { "id": "2", "title": "2" }, { "id": "3", "title": "3" }, { "id": "4", "title": "4" }] }] },
-    { "id": "long_press", "title": { "en": "Long press", "nl": "Lang indrukken" }, "args": [{ "name": "button", "type": "dropdown", "title": { "en": "Button", "nl": "Knop" }, "values": [{ "id": "1", "title": "1" }, { "id": "2", "title": "2" }, { "id": "3", "title": "3" }, { "id": "4", "title": "4" }] }] },
-    { "id": "double_click", "title": { "en": "Double click", "nl": "Dubbelklik" }, "args": [{ "name": "button", "type": "dropdown", "title": { "en": "Button", "nl": "Knop" }, "values": [{ "id": "1", "title": "1" }, { "id": "2", "title": "2" }, { "id": "3", "title": "3" }, { "id": "4", "title": "4" }] }] },
+    {
+      "id": "button_pressed",
+      "title": { "en": "Button pressed", "nl": "Knop ingedrukt" },
+      "titleFormatted": { "en": "Button [[button]] pressed: [[action]]", "nl": "Knop [[button]] ingedrukt: [[action]]" },
+      "args": [
+        {
+          "name": "button",
+          "type": "dropdown",
+          "title": { "en": "Button", "nl": "Knop" },
+          "values": [
+            { "id": "1", "title": "1" },
+            { "id": "2", "title": "2" },
+            { "id": "3", "title": "3" },
+            { "id": "4", "title": "4" }
+          ]
+        },
+        {
+          "name": "action",
+          "type": "dropdown",
+          "title": { "en": "Action", "nl": "Actie" },
+          "values": [
+            { "id": "short_press", "title": { "en": "Single", "nl": "Enkel" } },
+            { "id": "double_click", "title": { "en": "Double", "nl": "Dubbel" } },
+            { "id": "long_press", "title": { "en": "Long press", "nl": "Lang indrukken" } }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "short_press",
+      "title": { "en": "Short press", "nl": "Kort indrukken" },
+      "deprecated": true,
+      "args": [{ "name": "button", "type": "dropdown", "title": { "en": "Button", "nl": "Knop" }, "values": [{ "id": "1", "title": "1" }, { "id": "2", "title": "2" }, { "id": "3", "title": "3" }, { "id": "4", "title": "4" }] }]
+    },
+    {
+      "id": "long_press",
+      "title": { "en": "Long press", "nl": "Lang indrukken" },
+      "deprecated": true,
+      "args": [{ "name": "button", "type": "dropdown", "title": { "en": "Button", "nl": "Knop" }, "values": [{ "id": "1", "title": "1" }, { "id": "2", "title": "2" }, { "id": "3", "title": "3" }, { "id": "4", "title": "4" }] }]
+    },
+    {
+      "id": "double_click",
+      "title": { "en": "Double click", "nl": "Dubbelklik" },
+      "deprecated": true,
+      "args": [{ "name": "button", "type": "dropdown", "title": { "en": "Button", "nl": "Knop" }, "values": [{ "id": "1", "title": "1" }, { "id": "2", "title": "2" }, { "id": "3", "title": "3" }, { "id": "4", "title": "4" }] }]
+    },
     {
       "id": "dial_rotated",
       "title": { "en": "Dial rotated", "nl": "Draaiknop gedraaid" },

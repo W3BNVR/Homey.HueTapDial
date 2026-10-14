@@ -5,13 +5,16 @@ const Homey = require('homey');
 class TapDialDriver extends Homey.Driver {
   async onInit() {
     this.triggerCards = {
+      button_pressed: this.homey.flow.getDeviceTriggerCard('button_pressed'),
       short_press: this.homey.flow.getDeviceTriggerCard('short_press'),
       long_press: this.homey.flow.getDeviceTriggerCard('long_press'),
       double_click: this.homey.flow.getDeviceTriggerCard('double_click'),
       dial_rotated: this.homey.flow.getDeviceTriggerCard('dial_rotated'),
     };
-    for (const card of Object.values(this.triggerCards)) {
-      card.registerRunListener((args, state) => String(args.button) === String(state.button));
+    this.triggerCards.button_pressed.registerRunListener((args, state) =>
+      String(args.button) === String(state.button) && args.action === state.action);
+    for (const action of ['short_press', 'long_press', 'double_click']) {
+      this.triggerCards[action].registerRunListener((args, state) => String(args.button) === String(state.button));
     }
   }
 
@@ -25,6 +28,7 @@ class TapDialDriver extends Homey.Driver {
     for (const device of this.getDevices()) {
       const buttonIds = device.getStoreValue('buttonIds') || [];
       if (!buttonIds.includes(resourceId)) continue;
+      this.triggerCards.button_pressed.trigger(device, {}, { button, action }).catch(error => this.error(error));
       this.triggerCards[action].trigger(device, {}, { button }).catch(error => this.error(error));
     }
   }
