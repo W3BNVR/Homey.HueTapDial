@@ -159,6 +159,17 @@
             `${Homey.__('settings.diagnosis_found')}: ${result.foundCount || 0}`,
             `${Homey.__('settings.diagnosis_resources')}: ${discovery.deviceCount || 0} / ${discovery.buttonCount || 0} / ${discovery.rotaryCount || 0}`,
           ];
+          if (result.lastEvent) {
+            const last = result.lastEvent;
+            if (last.kind === 'button') {
+              const actionLabel = Homey.__(`settings.event_${last.action}`);
+              lines.push(`${Homey.__('settings.diagnosis_last_event')}: knop ${last.controlId}, ${last.event} → ${actionLabel} (${last.matchedDevices} ${Homey.__('settings.diagnosis_matched_devices')})`);
+            } else {
+              lines.push(`${Homey.__('settings.diagnosis_last_event')}: draaiknop ${last.direction}, ${last.steps} stap(pen) (${last.matchedDevices} ${Homey.__('settings.diagnosis_matched_devices')})`);
+            }
+          } else {
+            lines.push(Homey.__('settings.diagnosis_no_events'));
+          }
           if (discovery.candidates && discovery.candidates.length) {
             lines.push(`${Homey.__('settings.diagnosis_candidates')}:`);
             discovery.candidates.forEach(candidate => lines.push(`• ${candidate.name} (${candidate.model}) — ${candidate.buttonCount} ${Homey.__('settings.diagnosis_buttons')}, ${candidate.rotaryCount} ${Homey.__('settings.diagnosis_rotaries')}`));

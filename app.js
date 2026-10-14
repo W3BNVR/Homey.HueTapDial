@@ -186,6 +186,8 @@ class HueBridge extends EventEmitter {
 class HueTapDialApp extends Homey.App {
   async onInit() {
     this.bridge = null;
+    this.lastHueEvent = null;
+    this.lastLongPressAt = new Map();
     this.configureBridge();
     this.homey.settings.on('set', () => this.configureBridge());
   }
@@ -213,7 +215,13 @@ class HueTapDialApp extends Homey.App {
     if (!this.bridge) return { ok: false, status: 'not_configured' };
     try {
       const devices = await this.bridge.discoverTapDials();
-      return { ok: true, status: this.bridge.connectionStatus, discovery: this.bridge.lastDiscovery, foundCount: devices.length };
+      return {
+        ok: true,
+        status: this.bridge.connectionStatus,
+        discovery: this.bridge.lastDiscovery,
+        foundCount: devices.length,
+        lastEvent: this.lastHueEvent,
+      };
     } catch (error) {
       this.log(`Hue Tap Dial diagnostic failed: ${error.message}`);
       return { ok: false, status: this.bridge.connectionStatus, error: error.message };
@@ -281,9 +289,34 @@ class HueTapDialApp extends Homey.App {
       const report = resource.button.button_report;
       const event = report && report.event;
       const buttonNumber = String((resource.metadata && resource.metadata.control_id) || '');
-      const names = { short_release: 'short_press', long_release: 'long_press', double_short_release: 'double_click' };
+      const names = {
+        short_release: 'short_press',
+        long_press: 'long_press',
+        long_release: 'long_press',
+        double_short_release: 'double_click',
+      };
       const action = names[event];
-      if (action && /^[1-4]$/.test(buttonNumber)) driver.onHueButtonEvent(resource.id, buttonNumber, action);
+      let ignoredReason = null;
+      if (event === 'long_press') this.lastLongPressAt.set(resource.id, Date.now());
+      if (event === 'long_release') {
+        const lastLongPress = this.lastLongPressAt.get(resource.id) || 0;
+        this.lastLongPressAt.delete(resource.id);
+        if (Date.now() - lastLongPress < 2000) ignoredReason = 'duplicate_long_release';
+      }
+      let matchedDevices = 0;
+      if (!ignoredReason && action && /^[1-4]$/.test(buttonNumber)) {
+        matchedDevices = driver.onHueButtonEvent(resource.id, buttonNumber, action);
+      }
+      this.lastHueEvent = {
+        kind: 'button',
+        controlId: buttonNumber || 'unknown',
+        event: event || 'unknown',
+        action: action || 'unmapped',
+        matchedDevices,
+        ignoredReason,
+        time: new Date().toISOString(),
+      };
+      this.log(`Hue button event: button ${buttonNumber || '?'} ${event || 'unknown'} -> ${action || 'ignored'}; matched Homey devices: ${matchedDevices}${ignoredReason ? ` (${ignoredReason})` : ''}.`);
       return;
     }
 
@@ -295,12 +328,20 @@ class HueTapDialApp extends Homey.App {
       : event.rotation.direction === 'counter_clock_wise' ? 'counterclockwise' : null;
     const steps = Number(event.rotation.steps);
     if (!direction || !Number.isFinite(steps)) return;
-    driver.onHueDialRotated(resource.id, {
+    const matchedDevices = driver.onHueDialRotated(resource.id, {
       direction,
       steps: Math.abs(steps),
       duration: Number(event.rotation.duration) || 0,
       phase: event.action || event.event || 'rotate',
     });
+    this.lastHueEvent = {
+      kind: 'rotary',
+      direction,
+      steps: Math.abs(steps),
+      matchedDevices,
+      time: new Date().toISOString(),
+    };
+    this.log(`Hue rotary event: ${direction}, ${Math.abs(steps)} step(s); matched Homey devices: ${matchedDevices}.`);
   }
 
   async onUninit() {

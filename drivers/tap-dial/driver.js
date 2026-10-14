@@ -25,20 +25,26 @@ class TapDialDriver extends Homey.Driver {
   }
 
   onHueButtonEvent(resourceId, button, action) {
+    let matchedDevices = 0;
     for (const device of this.getDevices()) {
       const buttonIds = device.getStoreValue('buttonIds') || [];
       if (!buttonIds.includes(resourceId)) continue;
+      matchedDevices += 1;
       this.triggerCards.button_pressed.trigger(device, {}, { button, action }).catch(error => this.error(error));
       this.triggerCards[action].trigger(device, {}, { button }).catch(error => this.error(error));
     }
+    return matchedDevices;
   }
 
   onHueDialRotated(resourceId, tokens) {
+    let matchedDevices = 0;
     for (const device of this.getDevices()) {
       const rotaryIds = device.getStoreValue('rotaryIds') || [];
       if (!rotaryIds.includes(resourceId)) continue;
+      matchedDevices += 1;
       this.triggerCards.dial_rotated.trigger(device, tokens, {}).catch(error => this.error(error));
     }
+    return matchedDevices;
   }
 }
 
