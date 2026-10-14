@@ -14,6 +14,7 @@ class HueBridge extends EventEmitter {
     this.closed = false;
     this.retry = 1000;
     this.connectionStatus = 'connecting';
+    this.buttonNumbers = new Map();
   }
 
   setConnectionStatus(status) {
@@ -61,7 +62,10 @@ class HueBridge extends EventEmitter {
     ]);
 
     const buttonsByOwner = new Map();
+    this.buttonNumbers.clear();
     for (const button of buttonResult.data || []) {
+      const controlId = button.metadata && button.metadata.control_id;
+      if (controlId !== undefined && controlId !== null) this.buttonNumbers.set(button.id, String(controlId));
       const ownerId = button.owner && button.owner.rid;
       if (!ownerId) continue;
       if (!buttonsByOwner.has(ownerId)) buttonsByOwner.set(ownerId, []);
@@ -129,6 +133,20 @@ class HueBridge extends EventEmitter {
     return found;
   }
 
+  async refreshButtonNumbers() {
+    const result = await this.request('/clip/v2/resource/button');
+    this.buttonNumbers.clear();
+    for (const button of result.data || []) {
+      const controlId = button.metadata && button.metadata.control_id;
+      if (controlId !== undefined && controlId !== null) this.buttonNumbers.set(button.id, String(controlId));
+    }
+    this.log(`Loaded button numbers for ${this.buttonNumbers.size} Hue button resources.`);
+  }
+
+  getButtonNumber(resourceId) {
+    return this.buttonNumbers.get(resourceId) || null;
+  }
+
   connect() {
     if (this.closed) return;
     this.setConnectionStatus('connecting');
@@ -192,7 +210,7 @@ class HueTapDialApp extends Homey.App {
     this.homey.settings.on('set', () => this.configureBridge());
   }
 
-  configureBridge() {
+  async configureBridge() {
     if (this.bridge) this.bridge.close();
     const ip = String(this.homey.settings.get('bridge_ip') || '').trim();
     const key = String(this.homey.settings.get('application_key') || '').trim();
@@ -201,9 +219,15 @@ class HueTapDialApp extends Homey.App {
       this.log('Add the Hue Bridge IP address and application key in app settings to connect.');
       return;
     }
-    this.bridge = new HueBridge(ip, key, message => this.log(message));
-    this.bridge.on('resource', resource => this.handleHueResource(resource));
-    this.bridge.connect();
+    const bridge = new HueBridge(ip, key, message => this.log(message));
+    this.bridge = bridge;
+    bridge.on('resource', resource => this.handleHueResource(resource));
+    try {
+      await bridge.refreshButtonNumbers();
+    } catch (error) {
+      this.log(`Could not load Hue button numbers: ${error.message}`);
+    }
+    if (this.bridge === bridge) bridge.connect();
   }
 
   getBridgeConnectionStatus() {
@@ -288,7 +312,11 @@ class HueTapDialApp extends Homey.App {
     if (resource && resource.type === 'button' && resource.button) {
       const report = resource.button.button_report;
       const event = report && report.event;
-      const buttonNumber = String((resource.metadata && resource.metadata.control_id) || '');
+      const buttonNumber = String(
+        (resource.metadata && resource.metadata.control_id)
+        || this.bridge.getButtonNumber(resource.id)
+        || '',
+      );
       const names = {
         short_release: 'short_press',
         long_press: 'long_press',
