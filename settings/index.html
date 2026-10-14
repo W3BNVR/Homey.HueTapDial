@@ -9,6 +9,7 @@
     button { margin-top: 18px; }
     .hint { color: #666; line-height: 1.45; }
     #status { margin-top: 12px; }
+    #link-instructions { line-height: 1.45; }
   </style>
 </head>
 <body>
@@ -22,8 +23,8 @@
   </div>
   <button id="connect" class="homey-button-primary-full" data-i18n="settings.connect">Verbinden</button>
   <div id="link-step" hidden>
-    <p data-i18n="settings.press_link_button">Druk nu op de ronde linkknop op de Hue Bridge. Klik daarna op ‘Ik heb gedrukt’.</p>
-    <button id="confirm-link" class="homey-button-primary-full" data-i18n="settings.confirm_link">Ik heb gedrukt</button>
+    <p id="link-instructions" data-i18n="settings.press_link_button">Druk nu op de ronde linkknop op de Hue Bridge. De app controleert automatisch of de Bridge de druk heeft gezien.</p>
+    <button id="cancel-link" class="homey-button-secondary-full" data-i18n="settings.cancel">Annuleren</button>
   </div>
   <p id="status" role="status"></p>
   <script>
@@ -32,7 +33,9 @@
       const status = document.getElementById('status');
       const connect = document.getElementById('connect');
       const linkStep = document.getElementById('link-step');
-      const confirmLink = document.getElementById('confirm-link');
+      const cancelLink = document.getElementById('cancel-link');
+      let cancelled = false;
+      let connecting = false;
       Homey.get('bridge_ip', (err, value) => { if (!err && value) ip.value = value; });
       connect.addEventListener('click', () => {
         const address = ip.value.trim();
@@ -40,39 +43,48 @@
           status.textContent = Homey.__('settings.enter_ip');
           return;
         }
-        linkStep.hidden = false;
-        status.textContent = '';
-      });
-      confirmLink.addEventListener('click', () => {
-        const address = ip.value.trim();
+        if (connecting) return;
+        cancelled = false;
+        connecting = true;
         connect.disabled = true;
-        confirmLink.disabled = true;
-        status.textContent = Homey.__('settings.connecting');
-        Homey.api('POST', '/create-key', { ip: address }, (error, result) => {
-          if (error) {
-            status.textContent = Homey.__('settings.bridge_unreachable');
-            connect.disabled = false;
-            confirmLink.disabled = false;
-            return;
-          }
-            if (result && result.ok) {
+        linkStep.hidden = false;
+        status.textContent = Homey.__('settings.waiting_for_link');
+        const pollForLink = () => {
+          if (cancelled) return;
+          Homey.api('POST', '/create-key', { ip: address }, (error, result) => {
+            if (cancelled) return;
+            if (!error && result && result.ok) {
               status.textContent = Homey.__('settings.connected');
               linkStep.hidden = true;
+              connecting = false;
               connect.disabled = false;
-              confirmLink.disabled = false;
+              return;
+            }
+            if (!error && result && result.code === 'link_button_not_pressed') {
+              status.textContent = Homey.__('settings.waiting_for_link');
+              window.setTimeout(pollForLink, 1200);
               return;
             }
             const messages = {
               invalid_ip: 'settings.invalid_ip',
-              link_button_not_pressed: 'settings.link_not_pressed',
               bridge_timeout: 'settings.bridge_timeout',
               bridge_unreachable: 'settings.bridge_unreachable',
               bridge_rejected_request: 'settings.bridge_rejected',
             };
-            status.textContent = Homey.__(messages[result && result.code] || 'settings.bridge_unreachable');
+            status.textContent = Homey.__(messages[(result && result.code) || (error && error.message)] || 'settings.bridge_unreachable');
+            connecting = false;
             connect.disabled = false;
-            confirmLink.disabled = false;
+            linkStep.hidden = true;
         });
+        };
+        pollForLink();
+      });
+      cancelLink.addEventListener('click', () => {
+        cancelled = true;
+        connecting = false;
+        connect.disabled = false;
+        linkStep.hidden = true;
+        status.textContent = Homey.__('settings.cancelled');
       });
       Homey.ready();
     }

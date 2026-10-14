@@ -75,14 +75,28 @@ class HueBridge extends EventEmitter {
       const isTapDial = model === 'RDM002'
         || /tap\s*dial/i.test(`${deviceName || ''} ${productName || ''}`)
         || (buttonIds.length >= 4 && rotaryIds.length > 0);
-      if (!isTapDial || (buttonIds.length === 0 && rotaryIds.length === 0)) continue;
+      // The device resource is the authoritative product identifier. Keep a
+      // Tap Dial visible even when a Bridge firmware omits its child resources
+      // from the device response; otherwise pairing silently shows no results.
+      if (!isTapDial) continue;
       found.push({
         name: deviceName || productName || 'Hue Tap Dial Switch',
         data: { id: device.id },
         store: { buttonIds, rotaryIds },
       });
     }
-    this.log(`Hue discovery: ${found.length} Tap Dial device(s), ${buttonsByOwner.size} button owner(s), ${rotariesByOwner.size} rotary owner(s).`);
+    const candidates = (deviceResult.data || []).filter(device => {
+      const model = device.product_data && device.product_data.model_id;
+      const names = `${device.metadata && device.metadata.name || ''} ${device.product_data && device.product_data.product_name || ''}`;
+      return model === 'RDM002' || /tap\s*dial/i.test(names);
+    });
+    const candidateSummary = candidates.map(device => {
+      const name = device.metadata && device.metadata.name || 'unnamed';
+      const model = device.product_data && device.product_data.model_id || 'unknown model';
+      const paired = found.some(item => item.data.id === device.id);
+      return `${name} (${model}, ${paired ? 'paired' : 'missing services'})`;
+    }).join('; ') || 'none';
+    this.log(`Hue discovery: ${found.length} Tap Dial device(s) from ${deviceResult.data?.length || 0} devices; ${buttonResult.data?.length || 0} buttons, ${rotaryResult.data?.length || 0} rotaries. Candidates: ${candidateSummary}.`);
     return found;
   }
 
