@@ -96,13 +96,6 @@
                 }
               },
               {
-                "id": "double_click",
-                "title": {
-                  "en": "Double",
-                  "nl": "Dubbel"
-                }
-              },
-              {
                 "id": "long_press",
                 "title": {
                   "en": "Long press",
@@ -159,47 +152,6 @@
         "title": {
           "en": "Long press",
           "nl": "Lang indrukken"
-        },
-        "deprecated": true,
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=tap-dial"
-          },
-          {
-            "name": "button",
-            "type": "dropdown",
-            "title": {
-              "en": "Button",
-              "nl": "Knop"
-            },
-            "values": [
-              {
-                "id": "1",
-                "title": "1"
-              },
-              {
-                "id": "2",
-                "title": "2"
-              },
-              {
-                "id": "3",
-                "title": "3"
-              },
-              {
-                "id": "4",
-                "title": "4"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "id": "double_click",
-        "title": {
-          "en": "Double click",
-          "nl": "Dubbelklik"
         },
         "deprecated": true,
         "args": [

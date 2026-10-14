@@ -2,7 +2,7 @@
 
 Deze Homey-app voegt de Philips Hue Tap Dial Switch toe als apart apparaat en biedt twee apparaatstriggers:
 
-- **Knop ingedrukt** — selecteer knop 1–4 en kies Enkel, Dubbel of Lang indrukken.
+- **Knop ingedrukt** — selecteer knop 1–4 en kies Enkel of Lang indrukken.
 - **Draaiknop gedraaid**
 
 De draaiknoptrigger geeft richting, stapjes, duur en start/herhaalstatus door als Flow-tags. De integratie luistert naar de gebeurtenissen van de Hue Bridge v2 API; de Tap Dial moet dus al met een Hue Bridge zijn gekoppeld.
@@ -20,5 +20,5 @@ De app vraagt de Bridge zelf om een application key nadat je de linkknop hebt in
 ## Opmerkingen
 
 - De Bridge gebruikt een lokaal zelfondertekend TLS-certificaat; de app accepteert dat certificaat voor verbinding met het opgegeven Bridge-adres.
-- De Hue Bridge levert gebeurtenissen via zijn eventstream. De integratie stuurt alleen `short_release`, `long_release` en `double_short_release` door als Homey-triggers.
+- De Hue Bridge levert gebeurtenissen via zijn eventstream. De integratie stuurt `short_release` en `long_release` door als Homey-triggers. De Hue Tap Dial levert geen bruikbaar dubbelklik-event via deze eventstream.
 - Als de Bridge of het netwerk tijdelijk niet bereikbaar is, probeert de app de eventstream automatisch opnieuw te verbinden.

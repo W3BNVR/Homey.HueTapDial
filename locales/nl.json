@@ -32,7 +32,6 @@
     "diagnosis_no_events": "Nog geen knop- of draaiknop-events ontvangen sinds de app is gestart.",
     "diagnosis_matched_devices": "gekoppelde apparaten",
     "event_short_press": "enkel",
-    "event_double_click": "dubbel",
     "event_long_press": "lang indrukken",
     "event_unmapped": "niet herkend",
     "press_link_button": "Druk nu op de ronde linkknop op de Hue Bridge. De app controleert automatisch of de Bridge de druk heeft gezien.",

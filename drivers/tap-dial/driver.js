@@ -8,12 +8,11 @@ class TapDialDriver extends Homey.Driver {
       button_pressed: this.homey.flow.getDeviceTriggerCard('button_pressed'),
       short_press: this.homey.flow.getDeviceTriggerCard('short_press'),
       long_press: this.homey.flow.getDeviceTriggerCard('long_press'),
-      double_click: this.homey.flow.getDeviceTriggerCard('double_click'),
       dial_rotated: this.homey.flow.getDeviceTriggerCard('dial_rotated'),
     };
     this.triggerCards.button_pressed.registerRunListener((args, state) =>
       String(args.button) === String(state.button) && args.action === state.action);
-    for (const action of ['short_press', 'long_press', 'double_click']) {
+    for (const action of ['short_press', 'long_press']) {
       this.triggerCards[action].registerRunListener((args, state) => String(args.button) === String(state.button));
     }
   }

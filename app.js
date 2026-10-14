@@ -206,7 +206,6 @@ class HueTapDialApp extends Homey.App {
     this.bridge = null;
     this.lastHueEvent = null;
     this.lastLongPressAt = new Map();
-    this.pendingShortPresses = new Map();
     this.configureBridge();
     this.homey.settings.on('set', () => this.configureBridge());
   }
@@ -322,56 +321,14 @@ class HueTapDialApp extends Homey.App {
         short_release: 'short_press',
         long_press: 'long_press',
         long_release: 'long_press',
-        double_short_release: 'double_click',
       };
       const action = names[event];
-      const pressKey = `${resource.id}:${buttonNumber}`;
       let ignoredReason = null;
       if (event === 'long_press') this.lastLongPressAt.set(resource.id, Date.now());
       if (event === 'long_release') {
         const lastLongPress = this.lastLongPressAt.get(resource.id) || 0;
         this.lastLongPressAt.delete(resource.id);
         if (Date.now() - lastLongPress < 2000) ignoredReason = 'duplicate_long_release';
-      }
-
-      // Hue bridges commonly report two quick taps as two short_release events
-      // instead of a dedicated double_short_release event. Delay singles briefly
-      // so the pair can be recognized without emitting two single actions.
-      if (event === 'short_release' && /^[1-4]$/.test(buttonNumber)) {
-        const pending = this.pendingShortPresses.get(pressKey);
-        if (pending) {
-          clearTimeout(pending.timer);
-          this.pendingShortPresses.delete(pressKey);
-          const matchedDevices = driver.onHueButtonEvent(resource.id, buttonNumber, 'double_click');
-          this.recordHueButtonEvent(buttonNumber, event, 'double_click', matchedDevices, 'double_click_detected');
-          return;
-        }
-        const timer = setTimeout(() => {
-          this.pendingShortPresses.delete(pressKey);
-          const matchedDevices = driver.onHueButtonEvent(resource.id, buttonNumber, 'short_press');
-          this.recordHueButtonEvent(buttonNumber, event, 'short_press', matchedDevices, null);
-        }, 900);
-        this.pendingShortPresses.set(pressKey, { timer, resourceId: resource.id, buttonNumber, event });
-        this.lastHueEvent = {
-          kind: 'button', controlId: buttonNumber, event, action: 'waiting_for_second_tap',
-          matchedDevices: 0, ignoredReason: null, time: new Date().toISOString(),
-        };
-        this.log(`Hue button event: button ${buttonNumber} short_release; waiting briefly to distinguish a single tap from a double click.`);
-        return;
-      }
-
-      // A non-short event ends the double-click window and releases any pending
-      // single for this button before dispatching the new action.
-      if (event !== 'short_release') {
-        const pending = this.pendingShortPresses.get(pressKey);
-        if (pending) {
-          clearTimeout(pending.timer);
-          this.pendingShortPresses.delete(pressKey);
-          if (event !== 'double_short_release') {
-            const pendingMatches = driver.onHueButtonEvent(pending.resourceId, pending.buttonNumber, 'short_press');
-            this.recordHueButtonEvent(pending.buttonNumber, pending.event, 'short_press', pendingMatches, null);
-          }
-        }
       }
 
       let matchedDevices = 0;

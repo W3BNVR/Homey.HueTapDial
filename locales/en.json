@@ -32,7 +32,6 @@
     "diagnosis_no_events": "No button or rotary events received since the app started.",
     "diagnosis_matched_devices": "paired devices",
     "event_short_press": "single",
-    "event_double_click": "double",
     "event_long_press": "long press",
     "event_unmapped": "unrecognized",
     "press_link_button": "Press the round link button on the Hue Bridge now. The app will automatically check whether the Bridge detected it.",
