@@ -5,6 +5,7 @@ const Homey = require('homey');
 class TapDialDriver extends Homey.Driver {
   async onInit() {
     this.triggerCards = {
+      tap_dial_used: this.homey.flow.getDeviceTriggerCard('tap_dial_used'),
       button_pressed: this.homey.flow.getDeviceTriggerCard('button_pressed'),
       short_press: this.homey.flow.getDeviceTriggerCard('short_press'),
       long_press: this.homey.flow.getDeviceTriggerCard('long_press'),
@@ -29,6 +30,15 @@ class TapDialDriver extends Homey.Driver {
       const buttonIds = device.getStoreValue('buttonIds') || [];
       if (!buttonIds.includes(resourceId)) continue;
       matchedDevices += 1;
+      this.triggerCards.tap_dial_used.trigger(device, {
+        activity: 'button',
+        button: Number(button),
+        action,
+        direction: '',
+        steps: 0,
+        duration: 0,
+        phase: '',
+      }, {}).catch(error => this.error(error));
       this.triggerCards.button_pressed.trigger(device, {}, { button, action }).catch(error => this.error(error));
       this.triggerCards[action].trigger(device, {}, { button }).catch(error => this.error(error));
     }
@@ -41,6 +51,15 @@ class TapDialDriver extends Homey.Driver {
       const rotaryIds = device.getStoreValue('rotaryIds') || [];
       if (!rotaryIds.includes(resourceId)) continue;
       matchedDevices += 1;
+      this.triggerCards.tap_dial_used.trigger(device, {
+        activity: 'dial',
+        button: 0,
+        action: '',
+        direction: tokens.direction,
+        steps: tokens.steps,
+        duration: tokens.duration,
+        phase: tokens.phase,
+      }, {}).catch(error => this.error(error));
       this.triggerCards.dial_rotated.trigger(device, tokens, {}).catch(error => this.error(error));
     }
     return matchedDevices;

@@ -7,6 +7,8 @@ Deze Homey-app voegt de Philips Hue Tap Dial Switch toe als apart apparaat en bi
 
 De draaiknoptrigger geeft richting, stapjes, duur en start/herhaalstatus door als Flow-tags. De integratie luistert naar de gebeurtenissen van de Hue Bridge v2 API; de Tap Dial moet dus al met een Hue Bridge zijn gekoppeld.
 
+De algemene trigger **Hue Tap Dial gebruikt** start bij elke knopdruk of draaibeweging en geeft de activiteit door als Flow-tags.
+
 ## Instellen
 
 1. Installeer de app op Homey Pro of Homey Self-Hosted Server.

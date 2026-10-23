@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "nl.homey.hue-tap-dial-events",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "compatibility": ">=12.0.0",
   "sdk": 3,
   "name": {
@@ -38,6 +38,85 @@
   },
   "flow": {
     "triggers": [
+      {
+        "id": "tap_dial_used",
+        "title": {
+          "en": "Hue Tap Dial is used",
+          "nl": "Hue Tap Dial gebruikt"
+        },
+        "tokens": [
+          {
+            "name": "activity",
+            "type": "string",
+            "title": {
+              "en": "Activity",
+              "nl": "Activiteit"
+            },
+            "example": "button"
+          },
+          {
+            "name": "button",
+            "type": "number",
+            "title": {
+              "en": "Button",
+              "nl": "Knop"
+            },
+            "example": 1
+          },
+          {
+            "name": "action",
+            "type": "string",
+            "title": {
+              "en": "Press action",
+              "nl": "Drukactie"
+            },
+            "example": "short_press"
+          },
+          {
+            "name": "direction",
+            "type": "string",
+            "title": {
+              "en": "Direction",
+              "nl": "Richting"
+            },
+            "example": "clockwise"
+          },
+          {
+            "name": "steps",
+            "type": "number",
+            "title": {
+              "en": "Steps",
+              "nl": "Stapjes"
+            },
+            "example": 1
+          },
+          {
+            "name": "duration",
+            "type": "number",
+            "title": {
+              "en": "Duration (ms)",
+              "nl": "Duur (ms)"
+            },
+            "example": 100
+          },
+          {
+            "name": "phase",
+            "type": "string",
+            "title": {
+              "en": "Rotation phase",
+              "nl": "Draaistatus"
+            },
+            "example": "repeat"
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=tap-dial"
+          }
+        ]
+      },
       {
         "id": "button_pressed",
         "title": {

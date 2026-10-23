@@ -1,6 +1,19 @@
 {
   "triggers": [
     {
+      "id": "tap_dial_used",
+      "title": { "en": "Hue Tap Dial is used", "nl": "Hue Tap Dial gebruikt" },
+      "tokens": [
+        { "name": "activity", "type": "string", "title": { "en": "Activity", "nl": "Activiteit" }, "example": "button" },
+        { "name": "button", "type": "number", "title": { "en": "Button", "nl": "Knop" }, "example": 1 },
+        { "name": "action", "type": "string", "title": { "en": "Press action", "nl": "Drukactie" }, "example": "short_press" },
+        { "name": "direction", "type": "string", "title": { "en": "Direction", "nl": "Richting" }, "example": "clockwise" },
+        { "name": "steps", "type": "number", "title": { "en": "Steps", "nl": "Stapjes" }, "example": 1 },
+        { "name": "duration", "type": "number", "title": { "en": "Duration (ms)", "nl": "Duur (ms)" }, "example": 100 },
+        { "name": "phase", "type": "string", "title": { "en": "Rotation phase", "nl": "Draaistatus" }, "example": "repeat" }
+      ]
+    },
+    {
       "id": "button_pressed",
       "title": { "en": "Button pressed", "nl": "Knop ingedrukt" },
       "titleFormatted": { "en": "Button [[button]] pressed: [[action]]", "nl": "Knop [[button]] ingedrukt: [[action]]" },
